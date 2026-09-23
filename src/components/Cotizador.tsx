@@ -177,25 +177,12 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
     <div className="mx-auto flex h-full max-w-[1100px] flex-col px-4 sm:px-6">
       <header className="flex flex-none items-center gap-3 py-3 sm:py-4">
         <div className="flex items-center gap-3">
-          <IbrosLogo className="h-14 w-auto text-[var(--color-text)] md:h-16" />
-          <span className="h-5 w-px flex-none bg-[var(--color-border)] md:h-6" />
+          <IbrosLogo className="h-20 w-auto text-[var(--color-text)] md:h-24" />
+          <span className="h-6 w-px flex-none bg-[var(--color-border)] md:h-7" />
           <span className="font-[family-name:var(--font-label)] text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
             Cotizador
           </span>
         </div>
-
-        {step < TOTAL_STEPS && (
-          <div className="flex flex-1 gap-1.5 md:hidden">
-            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-              <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-[var(--color-border)]">
-                <div
-                  className="h-full bg-[var(--color-accent)] transition-all duration-200"
-                  style={{ width: i <= step ? "100%" : "0%" }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
       </header>
 
       <main className="grid flex-1 grid-cols-1 gap-5 pb-4 md:min-h-0 md:grid-cols-[1.4fr_0.9fr]">
@@ -367,8 +354,8 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
           </div>
           </div>
 
-          <div className="flex flex-none flex-col gap-1.5 border-t border-[var(--color-border)] px-5 pb-[calc(10px+env(safe-area-inset-bottom,0px))] pt-3.5">
-            <div className="flex gap-2.5">
+          {step < TOTAL_STEPS && (
+            <div className="flex flex-none gap-2.5 border-t border-[var(--color-border)] px-5 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-3.5">
               {step > 0 && (
                 <button
                   type="button"
@@ -399,10 +386,7 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
                 </button>
               )}
             </div>
-            <p className="pt-1 text-center font-[family-name:var(--font-label)] text-[0.65rem] tracking-wide text-[var(--color-text-muted)]">
-              Hecho por Gualicho
-            </p>
-          </div>
+          )}
         </div>
 
         <aside className="hidden flex-col rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-5.5 py-5.5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.07)] md:flex">
@@ -436,6 +420,15 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
           })}
         </aside>
       </main>
+
+      <a
+        href="https://somosgualicho.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex-none pb-2 text-center font-[family-name:var(--font-label)] text-[0.65rem] tracking-wide text-[var(--color-text-muted)] opacity-60 hover:opacity-100"
+      >
+        Creado por GUALICHO.
+      </a>
     </div>
   );
 }
