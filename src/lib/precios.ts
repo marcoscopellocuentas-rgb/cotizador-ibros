@@ -102,11 +102,3 @@ export const ESTADO_OPTS: { key: TramoEstado; title: string; desc: string }[] = 
     desc: "Presenta daños, alguna de sus partes no es original o no funciona correctamente.",
   },
 ];
-
-export type BuscaKey = "nuevo" | "usado" | "mirando";
-
-export const BUSCA_OPTS: { key: BuscaKey; title: string }[] = [
-  { key: "nuevo", title: "Quiero un iPhone nuevo, a estrenar!" },
-  { key: "usado", title: "Quiero un usado seleccionado" },
-  { key: "mirando", title: "Aún no lo sé, estoy mirando" },
-];

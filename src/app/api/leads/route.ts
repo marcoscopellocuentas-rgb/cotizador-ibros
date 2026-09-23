@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { appendLead, getPrecios } from "@/lib/sheets";
-import { buscarFila, calcularPrecio, BATERIA_OPTS, ESTADO_OPTS, BUSCA_OPTS, type TramoBateria, type TramoEstado } from "@/lib/precios";
+import { buscarFila, calcularPrecio, BATERIA_OPTS, ESTADO_OPTS, type TramoBateria, type TramoEstado } from "@/lib/precios";
 import { validarNombre, validarTelefono } from "@/lib/validacion";
 
 export async function POST(request: Request) {
@@ -9,12 +9,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Cuerpo inválido." }, { status: 400 });
   }
 
-  const { modelo, capacidad, bateria, estado, busca, nombre, telefono } = body as Record<string, string>;
+  const { modelo, capacidad, bateria, estado, nombre, telefono } = body as Record<string, string>;
 
-  if (!modelo || !capacidad || !bateria || !estado || !busca) {
+  if (!modelo || !capacidad || !bateria || !estado) {
     return NextResponse.json({ error: "Faltan datos de la cotización." }, { status: 400 });
   }
-  if (!BATERIA_OPTS.some((o) => o.key === bateria) || !ESTADO_OPTS.some((o) => o.key === estado) || !BUSCA_OPTS.some((o) => o.key === busca)) {
+  if (!BATERIA_OPTS.some((o) => o.key === bateria) || !ESTADO_OPTS.some((o) => o.key === estado)) {
     return NextResponse.json({ error: "Opción inválida." }, { status: 400 });
   }
 
@@ -35,7 +35,6 @@ export async function POST(request: Request) {
 
   const estadoLabel = ESTADO_OPTS.find((o) => o.key === estado)?.title ?? estado;
   const bateriaLabel = BATERIA_OPTS.find((o) => o.key === bateria)?.label ?? bateria;
-  const buscaLabel = BUSCA_OPTS.find((o) => o.key === busca)?.title ?? busca;
 
   const { guardado } = await appendLead({
     modelo,
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
     bateria: bateriaLabel,
     estado: estadoLabel,
     precioEstimado: final,
-    busca: buscaLabel,
     nombre: nombre.trim(),
     telefono: telefono.trim(),
   });

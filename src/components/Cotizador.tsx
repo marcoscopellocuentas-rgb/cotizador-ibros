@@ -4,21 +4,17 @@ import { useMemo, useState } from "react";
 import IbrosLogo from "./IbrosLogo";
 import {
   BATERIA_OPTS,
-  BUSCA_OPTS,
   ESTADO_OPTS,
-  buscarFila,
-  calcularPrecio,
   capacidadesPorModelo,
   modelos,
-  type BuscaKey,
   type FilaPrecio,
   type TramoBateria,
   type TramoEstado,
 } from "@/lib/precios";
 import { validarNombre, validarTelefono } from "@/lib/validacion";
 
-const TOTAL_STEPS = 6;
-const STEP_LABELS = ["Modelo", "Capacidad", "Batería", "Estado", "Búsqueda", "Contacto"];
+const TOTAL_STEPS = 5;
+const STEP_LABELS = ["Modelo", "Capacidad", "Batería", "Estado", "Contacto"];
 const WHATSAPP_NUMERO = "5493513571526";
 const INSTAGRAM_USUARIO = "ibros_cba";
 
@@ -27,7 +23,6 @@ type EstadoFormulario = {
   capacidad: string | null;
   bateria: TramoBateria | null;
   estado: TramoEstado | null;
-  busca: BuscaKey | null;
   nombre: string;
   telefono: string;
 };
@@ -37,7 +32,6 @@ const ESTADO_INICIAL: EstadoFormulario = {
   capacidad: null,
   bateria: null,
   estado: null,
-  busca: null,
   nombre: "",
   telefono: "",
 };
@@ -88,13 +82,8 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
     [precios, form.modelo]
   );
 
-  const filaActual = form.modelo && form.capacidad ? buscarFila(precios, form.modelo, form.capacidad) : undefined;
-  const detalle =
-    filaActual && form.bateria && form.estado ? calcularPrecio(filaActual, form.bateria, form.estado) : null;
-
   const bateriaLabel = BATERIA_OPTS.find((o) => o.key === form.bateria)?.label ?? null;
   const estadoOpt = ESTADO_OPTS.find((o) => o.key === form.estado) ?? null;
-  const buscaLabel = BUSCA_OPTS.find((o) => o.key === form.busca)?.title ?? null;
 
   const errorNombre = tocado.nombre ? validarNombre(form.nombre) : null;
   const errorTelefono = tocado.telefono ? validarTelefono(form.telefono) : null;
@@ -110,8 +99,6 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
       case 3:
         return !!form.estado;
       case 4:
-        return !!form.busca;
-      case 5:
         return !validarNombre(form.nombre) && !validarTelefono(form.telefono);
       default:
         return true;
@@ -157,14 +144,6 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
     }
   }
 
-  function reiniciar() {
-    setForm(ESTADO_INICIAL);
-    setTocado({ nombre: false, telefono: false });
-    setResultado(null);
-    setErrorEnvio(null);
-    setStep(0);
-  }
-
   function railValor(idx: number): string | null {
     switch (idx) {
       case 0:
@@ -176,8 +155,6 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
       case 3:
         return estadoOpt?.title ?? null;
       case 4:
-        return buscaLabel;
-      case 5:
         return form.nombre ? `${form.nombre}${form.telefono ? " · " + form.telefono : ""}` : null;
       default:
         return null;
@@ -190,7 +167,6 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
         `• Modelo: ${form.modelo} ${form.capacidad}\n` +
         `• Batería: ${bateriaLabel}\n` +
         `• Estado general: ${estadoOpt?.title}\n` +
-        `• Estoy buscando: ${buscaLabel}\n` +
         `• Valor estimado: USD ${resultado.toLocaleString("es-AR")}\n` +
         `• Nombre: ${form.nombre}\n` +
         `• Teléfono: ${form.telefono}\n\n` +
@@ -200,9 +176,9 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
   return (
     <div className="mx-auto flex h-full max-w-[1100px] flex-col px-4 sm:px-6">
       <header className="flex flex-none items-center gap-3 py-3 sm:py-4">
-        <div className="flex items-center gap-2.5">
-          <IbrosLogo className="h-10 w-auto text-[var(--color-text)] md:h-12" />
-          <span className="h-4 w-px flex-none bg-[var(--color-border)] md:h-[22px]" />
+        <div className="flex items-center gap-3">
+          <IbrosLogo className="h-14 w-auto text-[var(--color-text)] md:h-16" />
+          <span className="h-5 w-px flex-none bg-[var(--color-border)] md:h-6" />
           <span className="font-[family-name:var(--font-label)] text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
             Cotizador
           </span>
@@ -220,10 +196,6 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
             ))}
           </div>
         )}
-
-        <div className="whitespace-nowrap text-xs text-[var(--color-text-muted)] md:hidden">
-          {step < TOTAL_STEPS ? `${step + 1} / ${TOTAL_STEPS}` : "Listo"}
-        </div>
       </header>
 
       <main className="grid flex-1 grid-cols-1 gap-5 pb-4 md:min-h-0 md:grid-cols-[1.4fr_0.9fr]">
@@ -231,14 +203,10 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-2 pt-6">
           <div className="my-auto w-full py-2">
             {step === 0 && (
-              <StepShell eyebrow="Paso 1 de 6" titulo="¿Qué iPhone tenés?">
+              <StepShell eyebrow="Paso 1 de 5" titulo="¿Qué iPhone tenés?">
                 <select
                   id="modeloSelect"
-                  className="w-full appearance-none rounded-xl border-[1.5px] border-[var(--color-border-strong)] bg-[var(--color-surface-2)] bg-[length:16px] bg-[right_16px_center] bg-no-repeat px-4 py-3.5 font-[family-name:var(--font-body)] text-base text-[var(--color-text)] focus:outline-2 focus:outline-[var(--color-accent)]"
-                  style={{
-                    backgroundImage:
-                      "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>')",
-                  }}
+                  className="ibros-select w-full rounded-xl border-[1.5px] border-[var(--color-border-strong)] bg-[var(--color-surface-2)] px-4 py-3.5 font-[family-name:var(--font-body)] text-base text-[var(--color-text)] focus:outline-2 focus:outline-[var(--color-accent)]"
                   value={form.modelo ?? ""}
                   onChange={(e) => actualizar("modelo", e.target.value)}
                 >
@@ -255,14 +223,10 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
             )}
 
             {step === 1 && (
-              <StepShell eyebrow={`Paso 2 de 6 · ${form.modelo}`} titulo="Capacidad (GB)">
+              <StepShell eyebrow={`Paso 2 de 5 · ${form.modelo}`} titulo="Capacidad (GB)">
                 <select
                   id="capacidadSelect"
-                  className="w-full appearance-none rounded-xl border-[1.5px] border-[var(--color-border-strong)] bg-[var(--color-surface-2)] bg-[length:16px] bg-[right_16px_center] bg-no-repeat px-4 py-3.5 font-[family-name:var(--font-body)] text-base text-[var(--color-text)] focus:outline-2 focus:outline-[var(--color-accent)]"
-                  style={{
-                    backgroundImage:
-                      "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>')",
-                  }}
+                  className="ibros-select w-full rounded-xl border-[1.5px] border-[var(--color-border-strong)] bg-[var(--color-surface-2)] px-4 py-3.5 font-[family-name:var(--font-body)] text-base text-[var(--color-text)] focus:outline-2 focus:outline-[var(--color-accent)]"
                   value={form.capacidad ?? ""}
                   onChange={(e) => actualizar("capacidad", e.target.value)}
                 >
@@ -279,7 +243,7 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
             )}
 
             {step === 2 && (
-              <StepShell eyebrow="Paso 3 de 6" titulo="Estado de batería">
+              <StepShell eyebrow="Paso 3 de 5" titulo="Estado de batería">
                 <div className="grid grid-cols-3 gap-2.5">
                   {BATERIA_OPTS.map((o) => (
                     <OptionButton
@@ -295,7 +259,7 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
             )}
 
             {step === 3 && (
-              <StepShell eyebrow="Paso 4 de 6" titulo="Estado general">
+              <StepShell eyebrow="Paso 4 de 5" titulo="Estado general">
                 <div className="flex flex-col gap-2.5">
                   {ESTADO_OPTS.map((o) => (
                     <OptionButton
@@ -311,22 +275,7 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
             )}
 
             {step === 4 && (
-              <StepShell eyebrow="Paso 5 de 6" titulo="¿Qué andás buscando?">
-                <div className="flex flex-col gap-2.5">
-                  {BUSCA_OPTS.map((o) => (
-                    <OptionButton
-                      key={o.key}
-                      title={o.title}
-                      selected={form.busca === o.key}
-                      onClick={() => actualizar("busca", o.key)}
-                    />
-                  ))}
-                </div>
-              </StepShell>
-            )}
-
-            {step === 5 && (
-              <StepShell eyebrow="Paso 6 de 6" titulo="Nombre y número de teléfono">
+              <StepShell eyebrow="Paso 5 de 5" titulo="Nombre y número de teléfono">
                 <div className="flex flex-col gap-3.5">
                   <div>
                     <label htmlFor="nombreInput" className="mb-1.5 block font-[family-name:var(--font-label)] text-[0.72rem] font-bold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -411,28 +360,6 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
                       </svg>
                       Seguinos en Instagram · @{INSTAGRAM_USUARIO}
                     </a>
-
-                    {detalle && (
-                      <details className="mt-4 font-[family-name:var(--font-body)] text-[0.78rem] text-[var(--color-text-muted)]">
-                        <summary className="cursor-pointer font-bold">Ver detalle del cálculo</summary>
-                        <table className="mt-2.5 w-full border-collapse">
-                          <tbody>
-                            <tr className="border-b border-dashed border-[var(--color-border)]">
-                              <td className="py-1">Precio base ({bateriaLabel})</td>
-                              <td className="py-1 text-right font-semibold text-[var(--color-text)]">USD {detalle.base}</td>
-                            </tr>
-                            <tr className="border-b border-dashed border-[var(--color-border)]">
-                              <td className="py-1">Multiplicador ({estadoOpt?.title})</td>
-                              <td className="py-1 text-right font-semibold text-[var(--color-text)]">x {detalle.multiplicador}</td>
-                            </tr>
-                            <tr>
-                              <td className="py-1">Precio final</td>
-                              <td className="py-1 text-right font-semibold text-[var(--color-text)]">USD {resultado}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </details>
-                    )}
                   </>
                 )}
               </StepShell>
@@ -440,54 +367,41 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
           </div>
           </div>
 
-          <div className="flex flex-none gap-2.5 border-t border-[var(--color-border)] px-5 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-3.5">
-            {step > 0 && step <= 5 && (
-              <button
-                type="button"
-                onClick={() => setStep((s) => s - 1)}
-                className="rounded-xl border-[1.5px] border-[var(--color-border)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-text)]"
-              >
-                Atrás
-              </button>
-            )}
-            {step === TOTAL_STEPS && (
-              <button
-                type="button"
-                onClick={reiniciar}
-                className="rounded-xl border-[1.5px] border-[var(--color-border)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-text)]"
-              >
-                Atrás
-              </button>
-            )}
-            {step < 5 && (
-              <button
-                type="button"
-                disabled={!canAdvance()}
-                onClick={() => setStep((s) => s + 1)}
-                className="flex-1 rounded-xl bg-[var(--color-accent)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-accent-contrast)] disabled:opacity-40"
-              >
-                Siguiente
-              </button>
-            )}
-            {step === 5 && (
-              <button
-                type="button"
-                disabled={!canAdvance() || enviando}
-                onClick={handleVerResultado}
-                className="flex-1 rounded-xl bg-[var(--color-accent)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-accent-contrast)] disabled:opacity-40"
-              >
-                {enviando ? "Calculando..." : "Ver resultado"}
-              </button>
-            )}
-            {step === TOTAL_STEPS && (
-              <button
-                type="button"
-                onClick={reiniciar}
-                className="flex-1 rounded-xl bg-[var(--color-accent)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-accent-contrast)]"
-              >
-                Empezar de nuevo
-              </button>
-            )}
+          <div className="flex flex-none flex-col gap-1.5 border-t border-[var(--color-border)] px-5 pb-[calc(10px+env(safe-area-inset-bottom,0px))] pt-3.5">
+            <div className="flex gap-2.5">
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStep((s) => s - 1)}
+                  className="rounded-xl border-[1.5px] border-[var(--color-border)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-text)]"
+                >
+                  Atrás
+                </button>
+              )}
+              {step < 4 && (
+                <button
+                  type="button"
+                  disabled={!canAdvance()}
+                  onClick={() => setStep((s) => s + 1)}
+                  className="flex-1 rounded-xl bg-[var(--color-accent)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-accent-contrast)] disabled:opacity-40"
+                >
+                  Siguiente
+                </button>
+              )}
+              {step === 4 && (
+                <button
+                  type="button"
+                  disabled={!canAdvance() || enviando}
+                  onClick={handleVerResultado}
+                  className="flex-1 rounded-xl bg-[var(--color-accent)] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-[var(--color-accent-contrast)] disabled:opacity-40"
+                >
+                  {enviando ? "Calculando..." : "Ver resultado"}
+                </button>
+              )}
+            </div>
+            <p className="pt-1 text-center font-[family-name:var(--font-label)] text-[0.65rem] tracking-wide text-[var(--color-text-muted)]">
+              Hecho por Gualicho
+            </p>
           </div>
         </div>
 

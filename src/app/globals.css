@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light dark;
   --color-bg: #ffffff;
   --color-surface: #ffffff;
   --color-surface-2: #ffffff;
@@ -17,6 +18,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --color-bg: #000000;
     --color-surface: #000000;
     --color-surface-2: rgba(169, 169, 172, 0.14);
@@ -33,6 +35,7 @@
 }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --color-bg: #000000;
   --color-surface: #000000;
   --color-surface-2: rgba(169, 169, 172, 0.14);
@@ -78,4 +81,36 @@ body {
 
 [hidden] {
   display: none !important;
+}
+
+/*
+  El <select> nativo no puede tomar su icono de flecha de una variable
+  CSS, asi que la version para modo oscuro (flecha blanca) se resuelve
+  aca en vez de en el componente.
+*/
+.ibros-select {
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ibros-select {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  }
+}
+
+:root[data-theme="dark"] .ibros-select {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+}
+
+/*
+  Firefox pinta el fondo/texto de las <option> con sus colores nativos
+  del sistema salvo que se fuercen explicitamente.
+*/
+.ibros-select option {
+  background: var(--color-surface);
+  color: var(--color-text);
 }

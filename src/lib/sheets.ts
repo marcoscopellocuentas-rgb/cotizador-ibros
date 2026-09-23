@@ -80,7 +80,6 @@ export interface Lead {
   bateria: string;
   estado: string;
   precioEstimado: number;
-  busca: string;
   nombre: string;
   telefono: string;
 }
@@ -102,6 +101,9 @@ export async function appendLead(lead: Lead): Promise<{ guardado: boolean }> {
       range: `${TAB_LEADS}!A:I`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
+        // La columna "Busca" (G) se deja vacia a proposito: esa pregunta
+        // se saco del formulario y ya no se le pide al cliente, pero no
+        // tocamos la estructura de columnas de la planilla real.
         values: [[
           fecha,
           lead.modelo,
@@ -109,7 +111,7 @@ export async function appendLead(lead: Lead): Promise<{ guardado: boolean }> {
           lead.bateria,
           lead.estado,
           lead.precioEstimado,
-          lead.busca,
+          "",
           lead.nombre,
           lead.telefono,
         ]],
