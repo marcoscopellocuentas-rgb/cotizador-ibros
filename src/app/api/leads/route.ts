@@ -27,16 +27,16 @@ export async function POST(request: Request) {
   // El precio se recalcula en el server con los datos reales de Sheets: nunca
   // se confia en un precio que venga del cliente.
   const { precios } = await getPrecios();
-  const fila = buscarFila(precios, modelo, capacidad);
-  if (!fila) {
+  const filaPrecio = buscarFila(precios, modelo, capacidad);
+  if (!filaPrecio) {
     return NextResponse.json({ error: "No encontramos esa combinación de modelo y capacidad." }, { status: 400 });
   }
-  const { final } = calcularPrecio(fila, bateria as TramoBateria, estado as TramoEstado);
+  const { final } = calcularPrecio(filaPrecio, bateria as TramoBateria, estado as TramoEstado);
 
   const estadoLabel = ESTADO_OPTS.find((o) => o.key === estado)?.title ?? estado;
   const bateriaLabel = BATERIA_OPTS.find((o) => o.key === bateria)?.label ?? bateria;
 
-  const { guardado } = await appendLead({
+  const { guardado, fila } = await appendLead({
     modelo,
     capacidad,
     bateria: bateriaLabel,
@@ -46,5 +46,5 @@ export async function POST(request: Request) {
     telefono: telefono.trim(),
   });
 
-  return NextResponse.json({ precioEstimado: final, guardado });
+  return NextResponse.json({ precioEstimado: final, guardado, fila });
 }

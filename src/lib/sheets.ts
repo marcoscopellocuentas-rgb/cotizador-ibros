@@ -87,23 +87,26 @@ export interface Lead {
 // Agrega una fila a la pestana "Leads". Si todavia no hay credenciales
 // configuradas, solo lo deja registrado en el log del server (no bloquea
 // el flujo del usuario: igual puede seguir a WhatsApp).
-export async function appendLead(lead: Lead): Promise<{ guardado: boolean }> {
+// Devuelve el numero de fila donde quedo guardado, para poder despues
+// marcar si esa persona efectivamente continuo por WhatsApp o no.
+export async function appendLead(lead: Lead): Promise<{ guardado: boolean; fila: number | null }> {
   if (!credencialesConfiguradas()) {
     console.warn("GOOGLE_SHEET_ID / credenciales no configuradas. Lead no guardado:", lead);
-    return { guardado: false };
+    return { guardado: false, fila: null };
   }
 
   try {
     const sheets = getSheetsClient();
     const fecha = new Date().toLocaleString("es-AR", { timeZone: "America/Argentina/Cordoba" });
-    await sheets.spreadsheets.values.append({
+    const res = await sheets.spreadsheets.values.append({
       spreadsheetId: SHEET_ID,
       range: `${TAB_LEADS}!A:I`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        // La columna "Busca" (G) se deja vacia a proposito: esa pregunta
-        // se saco del formulario y ya no se le pide al cliente, pero no
-        // tocamos la estructura de columnas de la planilla real.
+        // La columna G (antes "Busca", pregunta que ya no existe) se
+        // reutiliza para registrar si continuo la conversacion por
+        // WhatsApp. Arranca en "No" y se actualiza a "Sí" desde
+        // marcarClickWhatsapp() si hace click en el boton.
         values: [[
           fecha,
           lead.modelo,
@@ -111,15 +114,45 @@ export async function appendLead(lead: Lead): Promise<{ guardado: boolean }> {
           lead.bateria,
           lead.estado,
           lead.precioEstimado,
-          "",
+          "No",
           lead.nombre,
           lead.telefono,
         ]],
       },
     });
-    return { guardado: true };
+
+    // updatedRange llega como "Leads!A15:I15"; de ahi sacamos el numero de fila
+    // (los caracteres no numericos entre el "!" y el primer digito son las
+    // letras de columna, ej. "A").
+    const rango = res.data.updates?.updatedRange ?? "";
+    const match = rango.match(/!\D*(\d+)/);
+    const fila = match ? Number(match[1]) : null;
+
+    return { guardado: true, fila };
   } catch (error) {
     console.error("No se pudo guardar el lead en Google Sheets:", error);
-    return { guardado: false };
+    return { guardado: false, fila: null };
+  }
+}
+
+// Actualiza la columna G de una fila puntual de "Leads" a "Sí", cuando
+// la persona hace click en el boton de WhatsApp del resultado.
+export async function marcarClickWhatsapp(fila: number): Promise<{ ok: boolean }> {
+  if (!credencialesConfiguradas() || !Number.isInteger(fila) || fila < 2) {
+    return { ok: false };
+  }
+
+  try {
+    const sheets = getSheetsClient();
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SHEET_ID,
+      range: `${TAB_LEADS}!G${fila}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [["Sí"]] },
+    });
+    return { ok: true };
+  } catch (error) {
+    console.error("No se pudo marcar el click de WhatsApp en Google Sheets:", error);
+    return { ok: false };
   }
 }

@@ -75,6 +75,8 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
   const [enviando, setEnviando] = useState(false);
   const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
   const [resultado, setResultado] = useState<number | null>(null);
+  const [filaLead, setFilaLead] = useState<number | null>(null);
+  const [whatsappClickeado, setWhatsappClickeado] = useState(false);
 
   const listaModelos = useMemo(() => modelos(precios), [precios]);
   const listaCapacidades = useMemo(
@@ -136,12 +138,26 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
         return;
       }
       setResultado(data.precioEstimado);
+      setFilaLead(data.fila ?? null);
       setStep(TOTAL_STEPS);
     } catch {
       setErrorEnvio("No pudimos conectar con el servidor. Probá de nuevo en un momento.");
     } finally {
       setEnviando(false);
     }
+  }
+
+  function handleClickWhatsapp() {
+    if (whatsappClickeado || filaLead === null) return;
+    setWhatsappClickeado(true);
+    // Fire-and-forget: no bloquea ni retrasa la apertura de WhatsApp.
+    fetch("/api/leads/click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fila: filaLead }),
+    }).catch(() => {
+      // Si falla, no pasa nada grave: el lead ya quedo guardado con "No".
+    });
   }
 
   function railValor(idx: number): string | null {
@@ -326,6 +342,7 @@ export default function Cotizador({ preciosIniciales }: { preciosIniciales: Fila
                       href={`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensajeWhatsapp)}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={handleClickWhatsapp}
                       className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#25D366] px-4.5 py-3.5 font-[family-name:var(--font-label)] text-[0.9rem] font-bold uppercase tracking-wide text-white"
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
