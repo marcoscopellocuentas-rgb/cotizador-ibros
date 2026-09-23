@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #ffffff;
+  --color-text: #000000;
+  --color-text-muted: #7a7a7d;
+  --color-border: #dcd9d3;
+  --color-border-strong: #a9a9ac;
+  --color-accent: #000000;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: rgba(0, 0, 0, 0.06);
+  --color-danger: #c7362a;
+  --color-danger-soft: #fbeae8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #000000;
+    --color-surface: #000000;
+    --color-surface-2: rgba(169, 169, 172, 0.14);
+    --color-text: #ffffff;
+    --color-text-muted: #a9a9ac;
+    --color-border: rgba(169, 169, 172, 0.35);
+    --color-border-strong: rgba(169, 169, 172, 0.55);
+    --color-accent: #ffffff;
+    --color-accent-contrast: #000000;
+    --color-accent-soft: rgba(255, 255, 255, 0.1);
+    --color-danger: #ff7a6e;
+    --color-danger-soft: rgba(255, 122, 110, 0.14);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #000000;
+  --color-surface: #000000;
+  --color-surface-2: rgba(169, 169, 172, 0.14);
+  --color-text: #ffffff;
+  --color-text-muted: #a9a9ac;
+  --color-border: rgba(169, 169, 172, 0.35);
+  --color-border-strong: rgba(169, 169, 172, 0.55);
+  --color-accent: #ffffff;
+  --color-accent-contrast: #000000;
+  --color-accent-soft: rgba(255, 255, 255, 0.1);
+  --color-danger: #ff7a6e;
+  --color-danger-soft: rgba(255, 122, 110, 0.14);
+}
+
+/*
+  Los colores de marca se consumen directo desde los componentes con
+  clases arbitrarias de Tailwind, por ej. bg-[var(--color-accent)],
+  para poder cambiar de tema (claro/oscuro) sin duplicar utilidades.
+*/
+@theme inline {
+  --font-display: var(--font-garet), var(--font-montserrat), sans-serif;
+  --font-label: var(--font-montserrat), sans-serif;
+  --font-body: var(--font-open-sans), sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-open-sans), sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+[hidden] {
+  display: none !important;
+}
